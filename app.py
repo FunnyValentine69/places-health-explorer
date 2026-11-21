@@ -66,3 +66,9 @@ if len(selected) > 0:
         )
     )
     st.altair_chart(histogram, width="stretch")
+
+    st.subheader("County map")
+    #Color counties above the U.S. county median orange and the rest blue
+    map_data = selected.assign(color=selected["value"].gt(us_median).map({True: "#f28e2b", False: "#4e79a7"}))
+    st.map(map_data, latitude="lat", longitude="lon", color="color", size=4000)
+    st.caption(f"Orange: above the U.S. county median ({us_median:.1f}%). Blue: at or below it.")
