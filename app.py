@@ -44,7 +44,8 @@ if len(selected) > 0:
     col1.metric("Counties with data", len(selected))
     col2.metric(f"{state} county median", f"{selected['value'].median():.1f}%")
     col3.metric("U.S. county median", f"{us_median:.1f}%")
-    st.caption(f"Age-adjusted prevalence among adults, survey year {selected['year'].iloc[0]}.")
+    st.caption(f"{selected['description'].iloc[0]}. Age-adjusted prevalence, survey year "
+               f"{selected['year'].iloc[0]}. The U.S. median uses all counties with data for this measure.")
 
     st.subheader(f"Counties ranked by {measure.lower()}")
     col1, col2 = st.columns(2)
@@ -79,7 +80,8 @@ st.write("Health equity: do counties with more food insecurity, housing insecuri
 col1, col2 = st.columns(2)
 needs = sorted(places[places["category"] == "Health-Related Social Needs"]["measure"].unique())
 need = col1.selectbox("Social need", needs, index=needs.index("Food Insecurity"))
-outcomes = sorted(places[places["category"].isin(["Health Outcomes", "Health Status"])]["measure"].unique())
+outcomes = places[places["category"].isin(["Health Outcomes", "Health Status"]) & (places["year"] == 2023)]
+outcomes = sorted(outcomes["measure"].unique())
 outcome = col2.selectbox("Health outcome", outcomes, index=outcomes.index("Diabetes"))
 scope = st.radio("Counties to include", [f"{state} only", "All states"], horizontal=True)
 
@@ -122,7 +124,7 @@ with st.expander("About the data and its gaps"):
              "(mammography, dental visit, colorectal cancer screening, short sleep, all teeth lost) are available.\n"
              "- Social needs measures cover 39 states and DC. Colorado, Florida, Kentucky, Oregon, "
              "Pennsylvania, South Dakota, Tennessee, Texas, Vermont, Washington, and Wyoming are missing.\n"
-             "- 66 estimates were suppressed because the county population was under 50.\n"
+             "- Loving County, Texas has no estimates because its population is under 50.\n"
              "- PLACES estimates are modeled from the BRFSS survey, not counted from medical records.")
 
 st.caption("Source: CDC PLACES: Local Data for Better Health, County Data, 2025 release (data.cdc.gov). "

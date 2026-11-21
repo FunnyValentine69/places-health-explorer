@@ -40,7 +40,7 @@ clean = counties.copy()
 #Keep age-adjusted prevalence, which CDC recommends for comparing counties
 clean = clean[clean["DataValueTypeID"] == "AgeAdjPrv"]
 
-#Drop suppressed values (county population under 50)
+#Drop suppressed values (Loving County, TX, population under 50)
 clean = clean.dropna(subset=["Data_Value"])
 
 #Split "POINT (lon lat)" text into numeric longitude and latitude
@@ -49,10 +49,13 @@ clean = clean.assign(lon=coords[0].round(4), lat=coords[1].round(4))
 
 #Keep the columns the app needs and give them short names
 clean = clean[["StateAbbr", "StateDesc", "LocationName", "LocationID", "Category",
-               "MeasureId", "Short_Question_Text", "Year", "Data_Value",
+               "MeasureId", "Short_Question_Text", "Measure", "Year", "Data_Value",
                "Low_Confidence_Limit", "High_Confidence_Limit", "TotalPop18plus", "lat", "lon"]]
 clean.columns = ["state", "state_name", "county", "fips", "category", "measure_id", "measure",
-                 "year", "value", "low_ci", "high_ci", "adult_pop", "lat", "lon"]
+                 "description", "year", "value", "low_ci", "high_ci", "adult_pop", "lat", "lon"]
+
+#Rename the insurance measure so it is clear that higher means more uninsured adults
+clean["measure"] = clean["measure"].replace("Health Insurance", "Lack of Health Insurance")
 
 #Label independent cities that share a name with a county (FIPS 510 and up)
 names = clean[["state", "county", "fips"]].drop_duplicates()
