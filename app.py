@@ -7,7 +7,7 @@ st.write("Explore CDC PLACES health estimates for U.S. counties. Pick a state an
          "to compare counties, then see how social needs relate to health outcomes.")
 
 
-#Load the cleaned county data once and reuse it on every rerun
+#Load cleaned data once (cached)
 @st.cache_data
 def load_data():
     return pd.read_csv("data/places_county_clean.csv", dtype={"fips": str})
@@ -15,7 +15,7 @@ def load_data():
 
 places = load_data()
 
-#Let the user pick a state, a category, and a measure
+#Pick state, category and measure
 states = sorted(places["state_name"].unique())
 state = st.selectbox("State", states, index=states.index("Oregon"))
 col1, col2 = st.columns(2)
@@ -23,13 +23,13 @@ category = col1.selectbox("Category", sorted(places["category"].unique()), index
 measures = sorted(places[places["category"] == category]["measure"].unique())
 measure = col2.selectbox("Measure", measures, index=measures.index("Obesity") if "Obesity" in measures else 0)
 
-#Keep the chosen measure for the whole country and for the chosen state
+#Chosen measure, U.S. and state
 national = places[places["measure"] == measure]
 selected = national[national["state_name"] == state]
 state_counties = places[places["state_name"] == state]["fips"].nunique()
 us_median = national["value"].median()
 
-#Warn when some counties in the state have no estimate for this measure
+#Warn if state counties missing estimates
 if len(selected) < state_counties:
     if state in ["Kentucky", "Pennsylvania"]:
         reason = "PLACES 2025 has no 2023 estimates for Kentucky and Pennsylvania counties."
@@ -69,7 +69,7 @@ if len(selected) > 0:
     st.altair_chart(histogram, width="stretch")
 
     st.subheader("County map")
-    #Color counties above the U.S. county median orange and the rest blue
+    #Orange above U.S. county median, blue at/below
     map_data = selected.assign(color=selected["value"].gt(us_median).map({True: "#f28e2b", False: "#4e79a7"}))
     st.map(map_data, latitude="lat", longitude="lon", color="color", size=4000)
     st.caption(f"Orange: above the U.S. county median ({us_median:.1f}%). Blue: at or below it.")
@@ -85,7 +85,7 @@ outcomes = sorted(outcomes["measure"].unique())
 outcome = col2.selectbox("Health outcome", outcomes, index=outcomes.index("Diabetes"))
 scope = st.radio("Counties to include", [f"{state} only", "All states"], horizontal=True)
 
-#Put the two measures side by side, one row per county
+#Measures side by side, one row per county
 pair = places[places["measure"].isin([need, outcome])]
 if scope != "All states":
     pair = pair[pair["state_name"] == state]
