@@ -55,3 +55,14 @@ if len(selected) > 0:
     col2.bar_chart(selected.nsmallest(10, "value"), x="county", y="value", y_label="%",
                    x_label="", horizontal=True, sort="value")
     st.caption("Counties whose confidence intervals overlap (see the data table below) may not truly differ.")
+
+    st.subheader(f"Distribution across {state} counties")
+    histogram = (
+        alt.Chart(selected)
+        .mark_bar()
+        .encode(
+            alt.X("value:Q", bin=alt.Bin(maxbins=20), title=f"{measure} (%)"),
+            alt.Y("count()", title="Number of counties")
+        )
+    )
+    st.altair_chart(histogram, width="stretch")
