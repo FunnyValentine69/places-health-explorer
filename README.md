@@ -7,6 +7,8 @@ transportation barriers, and others) with health outcomes, to look at health equ
 
 Final project for BMI 540, Oregon Health & Science University, Fall 2026.
 
+Live app: https://places-health-explorer.streamlit.app
+
 ## Data
 
 - Source: [CDC PLACES: Local Data for Better Health, County Data, 2025 release](https://data.cdc.gov/d/swc5-untb)
