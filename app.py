@@ -45,3 +45,13 @@ if len(selected) > 0:
     col2.metric(f"{state} county median", f"{selected['value'].median():.1f}%")
     col3.metric("U.S. county median", f"{us_median:.1f}%")
     st.caption(f"Age-adjusted prevalence among adults, survey year {selected['year'].iloc[0]}.")
+
+    st.subheader(f"Counties ranked by {measure.lower()}")
+    col1, col2 = st.columns(2)
+    col1.write("Highest 10")
+    col1.bar_chart(selected.nlargest(10, "value"), x="county", y="value", y_label="%",
+                   x_label="", horizontal=True, sort="-value")
+    col2.write("Lowest 10")
+    col2.bar_chart(selected.nsmallest(10, "value"), x="county", y="value", y_label="%",
+                   x_label="", horizontal=True, sort="value")
+    st.caption("Counties whose confidence intervals overlap (see the data table below) may not truly differ.")
