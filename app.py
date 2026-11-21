@@ -72,3 +72,43 @@ if len(selected) > 0:
     map_data = selected.assign(color=selected["value"].gt(us_median).map({True: "#f28e2b", False: "#4e79a7"}))
     st.map(map_data, latitude="lat", longitude="lon", color="color", size=4000)
     st.caption(f"Orange: above the U.S. county median ({us_median:.1f}%). Blue: at or below it.")
+
+st.subheader("Social needs and health outcomes")
+st.write("Health equity: do counties with more food insecurity, housing insecurity, or "
+         "transportation barriers also have more chronic disease?")
+col1, col2 = st.columns(2)
+needs = sorted(places[places["category"] == "Health-Related Social Needs"]["measure"].unique())
+need = col1.selectbox("Social need", needs, index=needs.index("Food Insecurity"))
+outcomes = sorted(places[places["category"].isin(["Health Outcomes", "Health Status"])]["measure"].unique())
+outcome = col2.selectbox("Health outcome", outcomes, index=outcomes.index("Diabetes"))
+scope = st.radio("Counties to include", [f"{state} only", "All states"], horizontal=True)
+
+#Put the two measures side by side, one row per county
+pair = places[places["measure"].isin([need, outcome])]
+if scope != "All states":
+    pair = pair[pair["state_name"] == state]
+pair = pair.pivot_table(index=["state", "county"], columns="measure", values="value")
+pair = pair.reindex(columns=[need, outcome]).dropna().reset_index()
+pair.columns = ["state", "county", "need", "outcome"]
+
+if len(pair) == 0:
+    st.warning(f"{state} has no social needs estimates. Choose \"All states\" to see the national pattern.")
+elif len(pair) < 3:
+    st.warning(f"Too few {state} counties to compare. Choose \"All states\" to see the national pattern.")
+else:
+    scatter = (
+        alt.Chart(pair)
+        .mark_circle(opacity=0.5)
+        .encode(
+            alt.X("need:Q", title=f"{need} (%)"),
+            alt.Y("outcome:Q", title=f"{outcome} (%)"),
+            tooltip=["county", "state", "need", "outcome"]
+        )
+    )
+    st.altair_chart(scatter, width="stretch")
+    col1, col2 = st.columns(2)
+    col1.metric("Counties", len(pair))
+    col2.metric("Correlation (Pearson r)", f"{pair['need'].corr(pair['outcome']):.2f}")
+    st.caption("Correlation does not mean causation. These are county estimates, so they do not "
+               "describe individual people. PLACES estimates every measure from the same inputs (age, sex, "
+               "race and ethnicity, education, and county poverty), which can make correlations look stronger.")
