@@ -112,3 +112,18 @@ else:
     st.caption("Correlation does not mean causation. These are county estimates, so they do not "
                "describe individual people. PLACES estimates every measure from the same inputs (age, sex, "
                "race and ethnicity, education, and county poverty), which can make correlations look stronger.")
+
+with st.expander("Show the data"):
+    st.dataframe(selected.sort_values("value", ascending=False)[["county", "value", "low_ci", "high_ci", "adult_pop", "year"]],
+                 hide_index=True)
+
+with st.expander("About the data and its gaps"):
+    st.write("- Kentucky and Pennsylvania counties have no 2023 estimates, so only five 2022 measures "
+             "(mammography, dental visit, colorectal cancer screening, short sleep, all teeth lost) are available.\n"
+             "- Social needs measures cover 39 states and DC. Colorado, Florida, Kentucky, Oregon, "
+             "Pennsylvania, South Dakota, Tennessee, Texas, Vermont, Washington, and Wyoming are missing.\n"
+             "- 66 estimates were suppressed because the county population was under 50.\n"
+             "- PLACES estimates are modeled from the BRFSS survey, not counted from medical records.")
+
+st.caption("Source: CDC PLACES: Local Data for Better Health, County Data, 2025 release (data.cdc.gov). "
+           "Public, aggregate county estimates. No individual patient records are used.")
